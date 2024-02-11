@@ -13,7 +13,7 @@ The CLI tool helps to generate credentials, including:
 * Client certificate, public and private keys
 * Generate JWT token
 
-Use `help` arg to learn more about the commands. Also you can run this to generate example credentials (CA and two clients with certificate and tokens):
+Use `help` arg to learn more about the commands and arguments. Also you can run this to generate example credentials (CA and two clients with certificate and tokens):
 ```make generate-credentials```
 
 ### Server
