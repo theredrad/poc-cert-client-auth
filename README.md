@@ -1,0 +1,4 @@
+# Proof of Concept - Certificate-based Client Authorization
+Authorization is always a challenge in the service to service call. This repository is a POC to see if we can authorize clients using certificates instead of JWT tokens. Normally, JWT tokens are used to let clients access protected resources, but what if the server that gives out those tokens isn't working? Then clients can't access what they need, which could be a big problem.
+
+So, we're trying out a way using certificates signed by a certificate authority (here the same authorization server). This test will help us see how well it works compared to using JWT tokens.

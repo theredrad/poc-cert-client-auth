@@ -1,0 +1,48 @@
+package jwt
+
+import (
+	"encoding/base64"
+	"testing"
+
+	"github.com/theredrad/certauthz/core/key"
+)
+
+const (
+	clientToken4096  = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vYm9iLmxvY2FsIiwiZXhwIjo0ODYwNzY3MzM1LCJpYXQiOjE3MDcxNjczMzUsInNjb3BlcyI6WyJib2IudXNlci5yZWFkIiwiYm9iLnVzZXIud3JpdGUiXSwic3ViIjoiYWxpY2UubG9jYWwifQ.ggFLFaBL7nikBYM-5htthScuODUq3dn-L_p5H1CAr-78gRmWvM6dmK95LPeXkfPz0RV8nNmyS3UJnl0Yu6CYdmjtX6xjcZanCHGl622IBz3QyWXcQjVz9gb_1cP9GKNBrqCWm1h_fC0f71KB5_nwHyo_yFpBEljtmaQv5lonbP6YyVD008olCuMGm9CaLPh5gBTsCnmsuhq3O_SxI869nWPpYLr00pv5bVk9OHP50C33TyXRSOKbJn39JaVdKwuM6ZuO1AKxpVnrAiRwBabMCdkXAzWx115eBws3In3cP5kXN2jtfY9G4IBPCJJAALi0eD6oSsIoNKfQtUC5Sm9lVMPhmutvp9l4MxDS9QZIRUMnvyRtUaYayftihoj0PUGN6yDT7rZebmhg6J9xDglPc_2urYmx_gl-UWo19xSC2HyP0cyV2VtATnLJOgSMWG34_0HUR4JEbFrpIEo7iAx_weqnH49GnA_JKRiAomwqB0x6w8eB9nCMwDKAMj3gdnZR1OVmlab6L1aMoEYZP87aUlMt8PzrB5Q5RqD_IOlt4hlHMj6-ZssyO0ZUbpnYh1q46CR-UpQA6qBrXwJCJnTUjtMfYUdC2KnkPnEL7NXUTW4n4MoLcH4Qsm1CYbKMyajN-aSIj7Tp6TR3TLAFLirTDOxrWdd4P-eqeHPLnfUjt_Y"
+	publicKey4096Str = "MIICIjANBgkqhkiG9w0BAQEFAAOCAg8AMIICCgKCAgEA4+E8s7Vnl4ntHEKwPqvOuqYA7jGXwmrYv7JqLk33jupAMedtemZGmjupmxTn3lGsgyBsrHmA13N5mT2sYleYypbg4Rl5JAu1OY/khqBavUgYC2frGD50Q1O2mC9mqsPK3n5Mhfh89g218VZL7QRAuz6ctTE1i9N6Ml29Gr3ztYI+/DUsnddwtJdDlAicKexYyjCRrcrcmdWOG3ozEtw54uLQpKwcwqZhiuQjG+7qYovOgKIOqjvugD2GoZBbmDq8ocBAhgK0vAvWuxnJBgQ+7ycUULKRW9tNPQ8/7CEZWr3RGbg6WNIyaJnbtplZ/ic+7Aa4VXc+uGF6iOOmHGRLBzVwamSYi9c2sBK0p7PPubeJA9Vf3QuD0ZyrzIs2Sg0YbdiOKsh8htIo7TvuBlZmtvtI6wfa9dMoVOQjkvBq5ct/q/g2OJ1GsAO550JYS1X3xa1kotzouZ7GkpdhYox2hceHpRo9iKFaGHGsTjA+2tkiIzKnh1CJPGpUMXv/c8/Bh0rH1MNJUJybHX1CkaxWnFQGyOTa3KkK+6lnG00DP7JVJ5CyqVipo0CGCn+rWKX1RA8dyRyQXFt1nODas0PGdLX8Xk2XQ+lrwZc+H8jY/93TTQtGbBYUJn6SjuRlnWdtLBDbU8MyUsRV0CF5oa64rVyEbNKJ9MjkmQbwnLZz82MCAwEAAQ=="
+	clientToken2048  = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOiJodHRwOi8vYm9iLmxvY2FsIiwiZXhwIjo0ODYwNzczODMwLCJpYXQiOjE3MDcxNzM4MzAsInNjb3BlcyI6WyJib2IudXNlci5yZWFkIiwiYm9iLnVzZXIud3JpdGUiXSwic3ViIjoiYWxpY2UubG9jYWwifQ.GGMw6dbnHSMN4qKPrsHgJbCh1p6Ro4Ai3oTQtG_FcMYLfqgo3YIdcupUVMs2ws6C6Kzr288iTiYvZ2spYcE_YmoMRO1jkK_vF-41RselNlcqCdlcjrMx04XnPehUFr-JtE-tLwCLkg0qwyP6Wc50NLUcnrK9TcG7mHvgWQwjo2J8lv8Q1XgteHKEX6Dr90lLswxhr6SubgN7PJ-Pclxebbzs81z9lFT1oinaa7NjmypoBgDYjWPNrPF61HFzOto4iBirrOZSxN9AMRJDN0xMP21FInrTVl1JaPXpUxQxczp_HxHuVqeTSZbGB-NiMPgscpL8Pq086frykmXdawPVGg"
+	publicKey2048Str = "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvkFvyLPuacfWKTinxEmqrpTTrYUB24LkWpUgMNYnhVvBkUVw2Mc3isbkmHq8Gta60T2ylsbN3iqgcDdP8LPDlLr6jG6MbnQ+iBKF5ft5rUF/OoqpvcxKIe/F9FMaxImkAkIpKAzM/OJ2tBRXuNPcSdoBR/w25g/210K79NHgTeOnikMDtpTp6K3fCrREDFk9NnXHLJqVk+XtBVQ/2vKG4X9cayAUwuYncvXLOMd3rKAZ3Vdorw9yoEeuPdGeyLCzaTJ9Ga26rwRMAj5rNKMf464j5VGZ+au08V5RRXjkUQuRv40mi0cmaPhWsZ5vJUvVdf4UbFl33OILfGX6aCGK3QIDAQAB"
+)
+
+var (
+	publicKey2048Bytes, _ = base64.StdEncoding.DecodeString(publicKey2048Str)
+	publicKey4096Bytes, _ = base64.StdEncoding.DecodeString(publicKey4096Str)
+)
+
+func BenchmarkValidatorValidate2048KeySize(b *testing.B) {
+	pubKey, err := key.DecodePublicKeyFromDER(publicKey2048Bytes)
+	if err != nil {
+		b.Errorf("expected pub key, got error: %s", err)
+		b.FailNow()
+	}
+
+	validator := NewValidator(pubKey)
+
+	for i := 0; i < b.N; i++ {
+		validator.Validate(clientToken2048)
+	}
+}
+
+func BenchmarkValidatorValidate4096KeySize(b *testing.B) {
+	pubKey, err := key.DecodePublicKeyFromDER(publicKey4096Bytes)
+	if err != nil {
+		b.Errorf("expected pub key, got error: %s", err)
+		b.FailNow()
+	}
+
+	validator := NewValidator(pubKey)
+
+	for i := 0; i < b.N; i++ {
+		validator.Validate(clientToken4096)
+	}
+}
