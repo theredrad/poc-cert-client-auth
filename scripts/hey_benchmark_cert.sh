@@ -37,5 +37,5 @@ ${NONCE}"
 
 SIGNATURE=$(echo -n "$SIGNATURE_BODY" | openssl sha256 -binary | openssl pkeyutl -sign -inkey $PRIVATE_KEY_FILE -keyform DER -pkeyopt digest:sha256 -pkeyopt rsa_padding_mode:pkcs1 | base64)
 
-# 10000 total requests, 100 concurrent
-hey -n 10000 -c 100 -H "X-Client-Cert: $CERT_BASE64" -H "X-Timestamp: $TIMESTAMP" -H "X-Signature: $SIGNATURE" -H "X-Nonce: $NONCE" $2
+# 100000 total requests, 100 concurrent
+hey -n 100000 -c 100 -H "X-Client-Cert: $CERT_BASE64" -H "X-Timestamp: $TIMESTAMP" -H "X-Signature: $SIGNATURE" -H "X-Nonce: $NONCE" $2

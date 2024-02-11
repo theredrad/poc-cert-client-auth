@@ -14,5 +14,5 @@ fi
 
 TOKEN=$(cat "$TOKEN_FILE")
 
-# 10000 total requests, 100 concurrent
-hey -n 10000 -c 100 -H "Authorization: Bearer $TOKEN" $2
+# 100000 total requests, 100 concurrent
+hey -n 100000 -c 100 -H "Authorization: Bearer $TOKEN" $2
