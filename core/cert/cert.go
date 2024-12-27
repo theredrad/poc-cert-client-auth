@@ -41,7 +41,7 @@ func NewCA(primaryPrivateKey, primaryPublicKey any, serialNumber int64, commonNa
 }
 
 // NewCert a new x509 certificate for the client
-func NewCert(caCert *x509.Certificate, clientPublicKey, caPrivateKey any, serialNumber int64, clientName, org, scopes string, expirationTime time.Duration) ([]byte, error) {
+func NewCert(caCert *x509.Certificate, clientPublicKey, caPrivateKey any, serialNumber int64, clientName, org, scopes string, dnsNames []string, expirationTime time.Duration) ([]byte, error) {
 	cert := &x509.Certificate{
 		SerialNumber: big.NewInt(serialNumber),
 		Subject: pkix.Name{
@@ -53,6 +53,7 @@ func NewCert(caCert *x509.Certificate, clientPublicKey, caPrivateKey any, serial
 		NotAfter:     time.Now().Add(expirationTime),
 		SubjectKeyId: []byte(fmt.Sprintf("%s-key-1", clientName)),
 		KeyUsage:     x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		DNSNames:     dnsNames,
 		ExtKeyUsage:  []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth, x509.ExtKeyUsageClientAuth},
 	}
 

@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -12,16 +13,19 @@ import (
 	"github.com/theredrad/certauthz/client/util"
 	"github.com/theredrad/certauthz/core/hmac"
 	"github.com/theredrad/certauthz/core/key"
+	coreTLS "github.com/theredrad/certauthz/core/tls"
 )
 
 var (
-	clientName = "alice"
-	serverAddr = "http://localhost:8585"
-	method     = "cert"
-	path       = "../credentials"
+	primaryName = "primary"
+	clientName  = "alice"
+	serverAddr  = "http://localhost:8585"
+	method      = "cert"
+	path        = "../credentials"
 )
 
 func init() {
+	flag.StringVar(&primaryName, "primary-name", "primary", "primary name including ca certificate and public key")
 	flag.StringVar(&clientName, "client-name", "alice", "client name")
 	flag.StringVar(&serverAddr, "server-addr", "http://localhost:8585", "server address")
 	flag.StringVar(&method, "auth-method", "cert", "authorization method. e.g. cert, token")
@@ -40,6 +44,20 @@ func main() {
 	switch method {
 	case "token":
 		r, err = newTokenRequest()
+	case "mtls":
+		tlsConfig, err := coreTLS.NewClientConfig(
+			fmt.Sprintf("%s/%s/ca_certificate.crt", path, primaryName),
+			fmt.Sprintf("%s/%s/certificate.crt", path, clientName),
+			fmt.Sprintf("%s/%s/private.key", path, clientName),
+		)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		client.Transport = &http.Transport{
+			TLSClientConfig: tlsConfig,
+		}
+		r, err = newTLSRequest()
 	default:
 		r, err = newCertRequest()
 	}
@@ -144,6 +162,15 @@ func newCertRequest() (*http.Request, error) {
 		return nil, fmt.Errorf("error while signing the request: %w", err)
 	}
 	r.Header.Add("X-Signature", signature) // set the request signature
+
+	return r, nil
+}
+
+func newTLSRequest() (*http.Request, error) {
+	r, err := http.NewRequest(http.MethodGet, fmt.Sprintf("%s/", serverAddr), nil)
+	if err != nil {
+		return nil, fmt.Errorf("error while initializing new reuqest: %w", err)
+	}
 
 	return r, nil
 }
