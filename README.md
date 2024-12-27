@@ -22,6 +22,11 @@ The Server operates as an HTTP server, offering two routes each equipped with di
 Run server:
 ```make run-server```
 
+The server also supports mTLS mode. When mTLS is enabled, the server asks for the client's certificate before handshaking. It checks that the certificate is signed by a trusted authority (CA) and includes a custom extension (scope) with the server's name prefix (e.g., bob.* for a server named bob). This ensures the client is allowed to connect to the server. On the other hand, the client checks the server's certificate. The communication between the server and client is encrypted using mTLS.
+
+Run server in mTLS mode:
+```make run-mtls-server``` 
+
 ### Client
 The client functions as an HTTP client designed for communication with the HTTP server. It requires specific parameters to transmit client credentials.
 
@@ -30,6 +35,9 @@ Send a request to `/token` endpoint with a valid JWT token (from `alice` client 
 
 Send a request to `/cert` endpoint with a valid Certificate token (from `alice` client to `bob`):
 ```make cert-request```
+
+Send a request to `/` over https with a valid Certtificate (from `alice` client to `bob`) and also validates the server certificate:
+```make mtls-request```
 
 ## Benchmark
 ### JWT Validator
